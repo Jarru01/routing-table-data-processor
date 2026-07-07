@@ -10,20 +10,23 @@ This repository contains a modular C++ application designed to ingest, parse, an
 
 The project workspace is divided cleanly between the application runtime layer and the underlying foundation framework:
 
+```text
+.
 ├── DataStructures.sln          # Master Visual Studio Solution File
-├── Semestralka/                # [MY CORE IMPLEMENTATION] Main Application Module
-│   ├── main.cpp                # App entry point & initialization sequence
-│   ├── terminal.h              # Multi-tier interactive console IO loop
-│   ├── file_reader.h           # Stream-based CSV dataset tokenizer
-│   ├── predicates.h            # Bitwise IPv4 translation & time parsing utilities
-│   ├── comparators.h           # Ordering configurations (Prefix weights / Lifespans)
-│   ├── algorithm.h             # Lambda evaluation engine running over iterators
-│   ├── node.h                  # Domain object model for routing table records
-│   └── iterator_manager.h      # Contextual state tracker for tree structures
-│
 ├── DataStructures/             # [EXTERNAL DEPENDENCY] Foundation Collection Library
-│   # Contains ImplicitSequence, MultiWayExplicitHierarchy, and SortedSequenceTable
-└── Gui/                        # [EXTERNAL DEPENDENCY] Supporting User Interface Components
+├── Gui/                        # [EXTERNAL DEPENDENCY] Supporting User Interface Components
+├── x64/                        # Build output directory
+└── Semestralka/                # [MY CORE IMPLEMENTATION] Main Application Module
+    ├── ClassDiagram.cd         # Visual architecture map charting implementation bounds
+    ├── Semestralka.vcxproj    # Visual Studio project compilation configurations
+    ├── main.cpp                # App entry point & initialization sequence
+    ├── algorithm.h             # Lambda evaluation engine running over iterators
+    ├── comparators.h           # Ordering configurations (Prefix weights / Lifespans)
+    ├── file_reader.h           # Stream-based CSV dataset tokenizer
+    ├── iterator_manager.h      # Contextual state tracker for tree structures
+    ├── node.h                  # Domain object model for routing table records
+    ├── predicates.h            # Bitwise IPv4 translation & time parsing utilities
+    └── terminal.h              # Multi-tier interactive console IO loop                      # [EXTERNAL DEPENDENCY] Supporting User Interface Components
 
 
 ---
