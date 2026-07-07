@@ -1,6 +1,4 @@
-﻿Markdown
-
-# Routing Table Data Processing Engine
+﻿# Routing Table Data Processing Engine
 
 This repository contains a modular C++ application designed to ingest, parse, and query complex network routing table datasets. The project layers a custom-built processing engine, file stream tokenizer, and an interactive multi-tier command-line interface on top of an external data-handling and graphical framework.
 
