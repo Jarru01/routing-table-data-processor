@@ -27,7 +27,7 @@ The project workspace is divided cleanly between the application runtime layer a
     ├── node.h                  # Domain object model for routing table records
     ├── predicates.h            # Bitwise IPv4 translation & time parsing utilities
     └── terminal.h              # Multi-tier interactive console IO loop                      # [EXTERNAL DEPENDENCY] Supporting User Interface Components
-
+```
 
 ---
 
