@@ -1,74 +1,77 @@
-﻿# Routing Table Data Processing Engine
+﻿# routing-table-data-processor
 
-This repository contains a modular C++ application designed to ingest, parse, and query complex network routing table datasets. The project layers a custom-built processing engine, file stream tokenizer, and an interactive multi-tier command-line interface on top of an external data-handling and graphical framework.
+A C++17 console app that loads an IPv4 routing table export and lets you query it in three
+ways: filter the full list, browse routes in a tree keyed by address octets, or look up
+every route that uses a given next hop.
 
-> ⚠️ **Implementation Notice:** The core logic, terminal interface, file stream parser, and lambda query mechanisms are contained entirely within the **`Semestralka`** directory, which represents my explicit contribution to this repository. The surrounding `DataStructures` and `Gui` modules serve as external core library dependencies.
+My code is in [`Semestralka/`](Semestralka). [`DataStructures/`](DataStructures) and
+[`Gui/`](Gui) are a provided data structures library (ADTs, memory types, unit tests and a
+test GUI) that the app is built on; I didn't write them.
 
----
+## What it does
 
-## 📁 Repository Architecture & Code Ownership
+The app reads the routing table once and builds three structures from it. Each one has its own
+menu:
 
-The project workspace is divided cleanly between the application runtime layer and the underlying foundation framework:
+1. **Filter the list** (`ImplicitSequence`). Pick a filter, then optionally sort the result.
+   - *Address match*: routes whose network contains the IP you enter. The address and its
+     CIDR mask are converted to 32-bit integers and compared bitwise.
+   - *Lifetime range*: routes whose age is within a range such as `2d3h-1w`. Lifetimes can be
+     written as `1w2d`, `3d04h` or `hh:mm:ss`.
+   - *Next hop*: routes that go via a given gateway.
+   - Sorting uses quicksort with a lambda comparator: by prefix (network, then mask length) or
+     by lifetime.
+2. **Browse the octet tree** (`MultiWayExplicitHierarchy`). Routes are stored in a four-level
+   tree, one level per octet (`10` → `10.1` → `10.1.5` → `10.1.5.0`). You can move down to a
+   child or back up, and run the same filters on just the current subtree.
+3. **Next-hop lookup** (`SortedSequenceTable`). A table keyed by next hop; binary search finds
+   the first route, and further routes with the same next hop are chained to it.
+
+The filters are written once as a generic function that takes an iterator range, a predicate
+lambda and an action lambda ([`algorithm.h`](Semestralka/algorithm.h)), so the same code runs
+over the flat list and over a tree subtree.
+
+The console menus are in Slovak.
+
+## Input format
+
+A `;`-separated file with a header line and six columns:
 
 ```text
-.
-├── DataStructures.sln          # Master Visual Studio Solution File
-├── DataStructures/             # [EXTERNAL DEPENDENCY] Foundation Collection Library
-├── Gui/                        # [EXTERNAL DEPENDENCY] Supporting User Interface Components
-├── x64/                        # Build output directory
-└── Semestralka/                # [MY CORE IMPLEMENTATION] Main Application Module
-    ├── ClassDiagram.cd         # Visual architecture map charting implementation bounds
-    ├── Semestralka.vcxproj    # Visual Studio project compilation configurations
-    ├── main.cpp                # App entry point & initialization sequence
-    ├── algorithm.h             # Lambda evaluation engine running over iterators
-    ├── comparators.h           # Ordering configurations (Prefix weights / Lifespans)
-    ├── file_reader.h           # Stream-based CSV dataset tokenizer
-    ├── iterator_manager.h      # Contextual state tracker for tree structures
-    ├── node.h                  # Domain object model for routing table records
-    ├── predicates.h            # Bitwise IPv4 translation & time parsing utilities
-    └── terminal.h              # Multi-tier interactive console IO loop                      # [EXTERNAL DEPENDENCY] Supporting User Interface Components
+source;lifetime;address;mask;metric;next-hop
+O;1w2d;10.1.0.0;16;[110/2];via 192.0.2.1
+S;02:15:30;192.168.10.0;24;[1/0];via 198.51.100.1
 ```
 
----
+The app uses `lifetime`, `address`, `mask` (prefix length) and `next-hop`. An empty mask is
+treated as `/32`. [`data/sample-rt.csv`](data/sample-rt.csv) is a small sample with
+documentation and private addresses.
 
-## 🚀 Core Implementation Features (Inside `Semestralka/`)
+## Build and run
 
-* **Multi-Tier Interactive CLI:** A dynamic, console-driven command shell routing three discrete lookup environments for flexible real-time operations.
-* **Extensible Lambda Predicates:** A generic query pipeline passing forward iterators and lambda logic blocks. New network validation criteria can be dropped in dynamically without modifying the engine.
-* **Bitwise Subnet Ingestion:** Converts text-encoded IPv4 elements into compact 32-bit binary boundaries (`uint32_t`) to execute immediate bitwise subnet mask evaluations.
-* **Chained Collision Management:** Resolves target duplicate matches cleanly by implementing memory-linked routing chains directly attached to shared `NextHop` nodes.
-* **Time-Interval Normalization:** Translates varied configurations (like plain seconds, standard `HH:MM:SS`, or mixed tokens like `2h30m`) into plain integers for normalized, high-speed sorting.
+Windows with Visual Studio 2022 (the "Desktop development with C++" workload):
 
----
+1. Open `DataStructures.sln`.
+2. Set **Semestralka** as the startup project and select **Release | x64**.
+3. Build with `Ctrl+Shift+B`.
 
-## 📊 Application Processing Tiers
+Pass the dataset path as the first argument. Without one, the app looks for `RT.csv` in the
+current directory:
 
-The application code inside `Semestralka/` leverages the underlying data library to organize data layouts into three progressive tiers:
+```bat
+x64\Release\Semestralka.exe data\sample-rt.csv
+```
 
-### Tier 1: Contiguous Sequence Filtering
-Performs linear queries across sequential memory layouts (`ImplicitSequence`). Users can filter entire routing records using dynamic conditions (e.g., active lifespan ranges) and sort the live output based on prefix lengths or normalized time seconds.
+## Project layout
 
-### Tier 2: Hierarchical Prefix Navigation
-Organizes routes into a multi-way prefix tree (Trie Structure) by breaking down IPv4 addresses into 4 distinct byte-octet layers. The CLI lets users browse deep into child branches, return to parent frames, or scope queries strictly to explicit sub-hierarchies.
-
-### Tier 3: Indexed Gateway Lookups
-Utilizes an ordered sequence table (`SortedSequenceTable`) keyed directly by gateway IPs. It performs fast binary searches to immediately pinpoint records matching specific `NextHop` keys while tracking overlapping gateway chains.
-
----
-
-## ⚙️ Compilation & Setup
-
-The solution is designed for **C++17** or newer standards using Microsoft Visual Studio or standard native CLI build environments (GCC/Clang).
-
-### Option 1: Compiling via Visual Studio
-1. Open the solution file `DataStructures.sln` inside Visual Studio.
-2. In the Solution Explorer, ensure that the **`Semestralka`** project is set as the startup project.
-3. Configure your build target to **Release** and architecture to **x64**.
-4. Press `Ctrl + Shift + B` to build the binary, and `F5` to execute the console shell.
-
-### Option 2: Compiling via Command Line (GCC)
-To compile the application module directly using native tooling, navigate to the project directory, verify your library links, and run:
-```bash
-g++ -std=c++17 -O3 Semestralka/main.cpp -o routing_processor
-
-Make sure your target dataset file (RT.csv) is located inside your active execution directory before running the compiled application binary.
+| Path | Contents |
+| :-- | :-- |
+| `Semestralka/main.cpp` | Loads the data and runs the main menu |
+| `Semestralka/file_reader.h` | CSV parsing and building the list, octet tree and next-hop table |
+| `Semestralka/terminal.h` | The three interactive menus |
+| `Semestralka/algorithm.h` | Generic filter over an iterator range with predicate and action lambdas |
+| `Semestralka/predicates.h` | Address, lifetime and next-hop filters |
+| `Semestralka/comparators.h` | Sort orders (prefix, lifetime) |
+| `Semestralka/iterator_manager.h` | Moving through the octet tree and pre-order traversal |
+| `Semestralka/node.h` | A routing table entry |
+| `DataStructures/`, `Gui/` | The provided library, its tests and test GUI |
