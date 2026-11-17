@@ -7,7 +7,7 @@
 
 #include <libds/amt/implicit_sequence.h>
 #include <libds/adt/table.h>
-#include "libds/heap_monitor.h."
+#include "libds/heap_monitor.h"
 
 
 using namespace std;
@@ -21,13 +21,13 @@ public:
     FileReader();
     ~FileReader();
 
-    void nacitajZaznamy();
+    bool nacitajZaznamy(const string& cestaSuboru);
     void vytvorSekvenciu(ImplicitSequence<Node*>& sekvenciaRt);
 	void vytvorHierarchiu(MultiWayExplicitHierarchy<Node*>& viacCestnaHierarchia);
     void vytvorTabulku(SortedSequenceTable<string, Node*>& tabulkaRt);
 
 private:
-    void nacitajSubor(string cestaSuboru, ImplicitSequence<Node*>& implicitnaSekvencia);
+    bool nacitajSubor(string cestaSuboru, ImplicitSequence<Node*>& implicitnaSekvencia);
 
     ImplicitSequence<Node*>* rt = new ImplicitSequence<Node*>();
     ImplicitSequence<Node*>* oktet1 = new ImplicitSequence<Node*>();
@@ -83,17 +83,18 @@ FileReader::~FileReader()
 
 }
 
-void FileReader::nacitajZaznamy()
+bool FileReader::nacitajZaznamy(const string& cestaSuboru)
 {
-    this->nacitajSubor("C:\\Users\\Jarru\\Desktop\\RT.csv", *this->rt);
+    return this->nacitajSubor(cestaSuboru, *this->rt);
 }
 
-void FileReader::nacitajSubor(string cestaSuboru, ImplicitSequence<Node*>& implicitnaSekvencia)
+bool FileReader::nacitajSubor(string cestaSuboru, ImplicitSequence<Node*>& implicitnaSekvencia)
 {
 
     fstream input_file(cestaSuboru);
     if (!input_file.is_open()) {
-        std::cout << "Subor sa nepodarilo otvorit!" << endl;
+        std::cout << "Subor sa nepodarilo otvorit: " << cestaSuboru << endl;
+        return false;
     }
 
     string line;
@@ -126,6 +127,7 @@ void FileReader::nacitajSubor(string cestaSuboru, ImplicitSequence<Node*>& impli
 
         implicitnaSekvencia.insertLast().data_ = router;
     }
+    return true;
 }
 
 void FileReader::vytvorSekvenciu(ImplicitSequence<Node*>& sekvenciaRt)

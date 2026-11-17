@@ -7,12 +7,18 @@ using namespace std;
 using namespace ds::amt;
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	initHeapMonitor();
 
+	// Cesta k datasetu: prvy argument, inak RT.csv v aktualnom adresari
+	string cestaSuboru = argc > 1 ? argv[1] : "RT.csv";
+
 	FileReader citac;
-	citac.nacitajZaznamy();
+	if (!citac.nacitajZaznamy(cestaSuboru))
+	{
+		return 1;
+	}
 
 	Terminal terminal;
 

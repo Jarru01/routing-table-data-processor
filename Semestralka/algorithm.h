@@ -4,7 +4,7 @@
 #include <libds/amt/implicit_sequence.h>
 //#include <algorithm>
 #include "node.h"
-#include "libds/heap_monitor.h."
+#include "libds/heap_monitor.h"
 
 using namespace std;
 using namespace ds::amt;

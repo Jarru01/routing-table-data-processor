@@ -15,7 +15,7 @@
 #include "predicates.h"
 #include "iterator_manager.h"
 #include "comparators.h"
-#include "libds/heap_monitor.h."
+#include "libds/heap_monitor.h"
 
 
 using namespace std;
